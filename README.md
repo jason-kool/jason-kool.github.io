@@ -1,2 +1,2 @@
-# cl0seted.org
-A place where I dump shit
+# jason-kool.github.io
+A personal website for dumping nonsense
