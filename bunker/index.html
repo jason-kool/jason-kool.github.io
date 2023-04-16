@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Bunker</title>
+    <link rel="stylesheet" href="./bruh.css">
+    <!-- 
+        What are you looking for?
+
+        Digging for secrets?
+
+        The CTF is over. There is nothing to find here.
+
+        arr = [b'24112', b'12426', b'12394', b'12373', b'12356', b'12290', b'12371', b'12371', b'12399', b'12394', b'12395', b'12418', b'12364', b'12394', b'12356', b'12384', b'12363', b'12425', b'12290']
+     -->
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+                <h1>Underground Bunker</h1>
+                <h2>A writeup of how I managed to find the flag</h2>
+        </div>
+        <hr>
+        <p>So an underground bunker, huh? Let's see if we can find any equipment in Bob's refuge..</p>
+        <p>
+            Visiting <a href="">http://underground.d.lagncra.sh/</a> on our browser, we
+            are redirected onto a login page, hosted on <a href="">http://underground.d.lagncra.sh/login</a>
+        </p>
+        <img src="./images/bunker1.png" class="full">
+        <p>
+            Doesn't seem like there's much here.. Perhaps we can find a clue in the page source?
+        </p>
+        <img src="./images/bunker2.png" class="mid">
+        <p>
+            Now we're getting somewhere. Seems like there are some external scripts being used for the page, such as..
+            the one responsible for the entire login function!
+        </p>
+        <img src="./images/bunker3.png" class="mid">
+        <p>
+            This portion of the script apparently checks if the password hash matches <code>ea847988ba59727dbf4e34ee75726dc3</code>,
+            which is generated using the md5 hashing algorithm, AKA the one algorithm that is recommended by everyone to
+            <i>not</i> use.
+        </p>
+        <p>
+            Let's try and see if we can find the original string value before it was hashed. Searching online for a reverse md5 lookup, let's try 
+            <a href="https://md5.gromweb.com/">this</a> site for our purposes.
+        </p>
+        <img src="images/bunker4.png" class="mid">
+        <p>
+            Nice! Now we have the password! Let's use Bob's credentials and try to access his account..
+        </p>
+        <img src="images/bunker5.png" class="small">
+        <p>
+            Inputting <code>bob </code> and <code>topsecret </code>, we're brought into a message wall. A shame that it's been vandalised by other survivors.
+        </p>
+        <img src="images/bunker6.png" class="full">
+        <p>
+            Right then. Let's see if we can do anything funny with this message wall..
+        </p>
+        <img src="images/bunker7.png" class="large"> <br>
+        <img src="images/bunker8.png" class="full">
+        <p>
+            Shucks. Doesn't seem like Cross Site Scripting will get us anywhere here. What do I do now?
+        </p>
+        <p>
+            I was going to brood over this fact when I realised that each message was apparently a hyperlink?
+        </p>
+        <img src="images/bunkerbruh.gif" class="mid">
+        <p>
+            That might be interesting... <br> 
+            Clicking on the message brings me to another page containing the message and its author.
+        </p>
+        <p>
+            This didn't seem all that much helpful, until I realised that the message number corresponds to the current active URL path.
+        </p>
+        <img src="images/bunkerbruh3.png" class="mid">
+        
+        <p>
+            Could this mean that, as of writing, we have 170 messages? <br>
+            Let's test that theory and see if we can find the start of the index..
+        </p>
+        <img src="images/bunker11.png" class="mid">
+        <img src="images/bunker12.png" class="mid">
+        <p>
+            A message author and message content with nonsensical data?
+        </p>
+        <p>
+            Right! So this means that, if we're looking for something special, it most probably would've been done by a user that is <b>NOT</b> bob. But if we're looking through more than a hundred of these? There's no way we're going to do that by hand. Time to start scripting!
+        </p>
+        
+        <p>
+            First, let's test and see if we can grab, let's say message 10, using Python's request HTTP library. <br>
+            This Python script essentially performs a GET request at the specified URL. In this case, we're trying to GET message number 10.
+        </p>
+        <img src="images/bunkercode.png" class="mid">
+        <img src="images/bunkertest.png" class="large">
+        <p>
+            That's weird. This HTML code looks familiar..<br>
+            Hang on. This is the source code to <a href="">http://underground.d.lagncra.sh/login</a> earlier! Why are we back at the login page? <br>
+            This means that to the website, our script hasn't proven that it has "logged in" to the site. Hmm..
+        </p>
+        <p>
+            Since we've already logged in on our browser, let's provide our script with our session tokens to use as credentials to access the page. <br>
+            Consensual session hijacking!
+        </p>
+        <p>
+            First, let's intercept the page GET using Burp.
+        </p>
+        <img src="images/bunker13.png" class="full">
+        
+        <p>
+            Now let's copy all of the headers in our GET request, and declare that in our Python script.<br>
+            This will essentially trick the website into thinking that the Python script is actually <i>us</i> making the request on our own internet browser.
+        </p>
+        <img src="images/bunker14.png" class="full">
+
+        <p>
+            So starting from index 0, our Python script will use our header information to "log in", then it will GET the current message index's HTML page and grab the message author and content, using string manipulation to sanitize the output. <br><br>
+
+            If the script reaches a message written by "bob", this means that all non-user generated inputs have been searched, and everything else from this point is not usable.<br><br>
+            
+            If the script encounters something that looks like it could be our flag (containing "lnc2023"), it will stop the script and print it.<br>
+            There's probably a better and/or more neater way to do this, but I'm not smart enough to know that lol<br>
+        </p>
+
+        <p>
+            Alright. With that out of the way, let's run the script and look at the output!
+        </p>
+        <img src="./images/bunkertestrun.gif" class="full">
+        <p>
+            That's a bit fast, uhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+        </p>
+        <p>
+            On second thought, let's just run the script and output <i>that</i> into a file for reading!
+        </p>
+        <img src="images/bunker15.png" class="mid">
+        
+        <p>
+            Now let's look through our output and see if there's anything useful or interesting.<br>
+            Earlier we saw a large chunk of text fly by amongst the other ones, perhaps we should investigate that first?
+        </p>
+        <img src="images/bunker16.gif" class="mid"> <br>
+
+        <div class="coode">
+            <code>
+                Message number 47<br>
+                Author: Billy <br>
+                Message Content: WzA3LzEwLzMwMjNdIExhbmQgU3VydmV5IFJlcG9ydAoKW1JhZGlhdGlvbjogMzAwU3YvaHJdCltTdXJmYWNlIFRlbXBlcmF0dXJlOiA4NTEuMTVLXQoKLi4uIFtUUkFOU01JVFRFUiBEQVRBXSAuLi4KV2UgYXJlIGdldHRpbmcgY2xvc2VyIHRvIHRoZSBjZW50ZXIgb2YgdGhlIGJsYXN0OyBvciBpcyB0aGUgYmxhc3QgY29taW5nIHRvIHVzPwoKSSBob3BlIG91ciBidW5rZXIgaGFzIGVub3VnaCByYWRpYXRpb24gc2hpZWxkaW5nIHRvIHByb3RlY3Qgb3VyIGRhdGEuLi4KCkJvYiB3aWxsIGJlIGNvbWluZyBiYWNrIHdpdGggYSBncm91bmQgc2FtcGxlIGZvciByZXNlYXJjaCBhbnl0aW1lIHNvb24sIHdlYXRoZXIgZm9yZWNhc3QgcHJlZGljdHMgYSBzdHJvbmcgc2FuZHN0b3JtIGFsb25nIHRoZSB3YXkuCgpJJ20gbm90IHN1cmUgaWYgQm9iIGhhcyBsYWIgcGVybWlzc2lvbnMsIGhlIGNhbiB1c2UgbXkgYWNjb3VudC4gVGhlIHBhc3N3b3JkIGlzIGJpbGx5Ym9uZ2FzMTIzLiBZZWFoLCBJIGNob3NlIHRoaXMgd2hlbiBJIHdhcyBzdGlsbCBpbiB0aGUgYWNhZGVteSAtXy0KCkdvb2QgbHVjayBvdXQgdGhlcmUKLi4uIFtFTkQgT0YgVFJBTlNNSVNTSU9OXSAuLi4KCltUcmFuc21pdHRlcjogMDA0N0EgKEJJTExZKV0KW0Jhc2UgUm91dGU6IDAwNDdBIC0+IENIQVJMSUUgLT4gRk9YVFJPVCAtPiBZT1Vd
+            </code>
+        </div>
+
+        <p>
+            An awfully large chunk of gibberish, sent by someone named "Billy", huh? Let's see if this wall of text means anything using some common encoding techniques..
+        </p>
+
+        <img src="images/bunker17.png" class="large">
+        <p>
+            A base64 encoded transmission consisting of dialogue from some teammates! How kind of Billy to let us.. I mean Bob, to use his account! Don't mind if I do... <br>
+            Let's travel back to the login page at <a href="">http://underground.d.lagncra.sh/login</a> and input Billy's credentials..
+        </p>
+        
+        <img src="images/bunker18.png" class="mid">
+        
+        <p>
+            Logging in with the credentials `Billy` and `billybongas123`, and we're greeted with the flag!
+        </p>
+        
+        <img src="images/bunker19.png" class="full">
+
+        <p>
+            Sorry to hear about your teammates Bob, but hopefully they're still out there somewhere! <br>
+            As for us, we've got what we came here for.
+        </p>
+
+        <hr>
+        <div class="header">
+            <h1>Reflection</h1>
+        </div>
+        <p>
+            After doing this challenge, I feel like perhaps the main challenge was to test us on our ability to streamline things. <br>
+            The most difficult part for me was just creating that Python script in the first place. I do enjoy these types of challenges,
+            ones where you have to get your hands dirty and create something to help you with getting the flag.<br><br>
+            
+            When it comes to solving the challenge with this method, I think the pre-requisites would be:
+        </p>
+            <ul>
+                <li>Basic understanding of hasing</li>
+                <li>Understanding of cookies and session hijacking</li>
+                <li>Understanding of POST and GET requests</li>
+                <li>Intermediate scripting ability in language of choice</li>
+                <li>Some knowledge on cryptography and common encoding types</li>
+            </ul>
+            <p>
+                So with that said, I think I can see why this challenge would be given a medium rating. 
+            </p>
+    </div>
+
+</body>
+
+</html>
