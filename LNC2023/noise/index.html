@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Noise</title>
+    <link rel="stylesheet" href="./bruh.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+                <h1>Noise</h1>
+                <h2>A <a class="nice">Lag and Crash 2023</a> CTF challenge writeup</h2>
+                <hr>
+                <h3>Challenge tags: <a class="nice">Crypto</a></h3>
+                <hr>
+        </div>
+
+        <img src="assets/noisedesc.png" class="small">
+        <p>
+            Right! What do we have here, two audio files?<br>
+            I mean, what else can we do other than listen to them? <br><br>
+            By checking file properties, we can see that both files have the exact same duration.
+        </p>
+        <img src="assets/noise.png" class="mid">
+        <p>
+            Below are ten second excerpts, taken from the same starting position of both files. <br>
+        </p>
+        <a class="idk">message_trim.wav</a> <br>
+        <audio src="assets/messsage_trim(10).wav" type="audio/wav" autoplay="true" controls="" preload="auto" autobuffer="" id="message"></audio> <br><br>
+        <a class="idk">noise_trim.wav</a> <br>
+        <audio src="assets/noise_trim(10).wav" type="audio/wav" autoplay="true" controls="" preload="auto" autobuffer="" id="noise"></audio> <br><br>
+
+        <p>
+            As suggested by the names, <a class="idk">message.wav</a> is a wave file containing morse audio that can faintly be heard, muffled by white noise. On the other hand, <a class="idk">noise.wav</a> is the exact same white noise played over the morse audio.
+        </p>
+
+        <p>
+            So what does one do now? Is it even possible to "subtract" audio from each other?
+        </p>
+
+        <p>
+            As it turns out, audio waves are additive, so if you played a waveform, and then played the inverse of that exact waveform, they will cancel each other out, and you will get silence.
+        </p>
+
+        <p>
+            A bit of a simplified explanation, <br>
+            Everyone knows that (1)+(-1)=0, right? <br>
+            Just like with waves, if you have the exact opposite of something, and you add them together, you will be resulted with nothing. 
+            This example can be seen using a graphing calculator.
+        </p>
+        <img src="assets/math.png" class="mid">
+
+        <p>
+            This is a common trick amongst musicians and producers when trying to extract the vocals or instruments from a fully mixed track. 
+            If you got your hands on the exact studio instrumentals, reversed the polarity of the audio, and played it 
+            against the final mix, you would be left with only the vocals of the song. <br><br>
+
+            This is called "Phase cancellation", and is a well known trick used by musicians, producers and sound engineers
+             either to extract specific information from a track, or to achieve silence or a quiet environment in a venue. 
+             This is also how noise-cancelling headphones work. <br><br>
+
+            Of course, there is a catch to this; this method only works if you have the exact waveform or audio file that you want to cancel out. <br><br>
+
+            More information can be found from <a href="https://www.audio-technica.com/en-us/support/audio-solutions-question-of-the-week-what-is-phase-cancellation">here</a>.
+        </p>
+
+        <p>
+            Anyways, in our case, we can hear that the noise being played is the exact one covering the audio in message.wav.
+        </p>
+
+        <p>
+            So now, let's pipe our audio samples into Audacity, which is a free, open-source digital audio editor that can be downloaded from <a href="https://www.audacityteam.org/download/">here</a>.
+        </p>
+        <br>
+        <p>
+            Once we have uploaded the two files onto Audacity, we will select one of the files (either will do fine).
+        </p>
+
+        <img src="assets/noise1.png" class="full"><br><br>
+        <img src="assets/noise2.png" class="mid">
+
+        <p>
+            After selecting a file, on the top tabs, go to Effects > Invert
+        </p>
+        <img src="assets/noise3.png" class="large">
+
+        <p>
+            Afterwards, press the play button and notice how different the audio sounds. <br>
+            Below is a 10 second excerpt of the two tracks being played after we have performed phase cancellation.
+        </p>
+
+        <a class="idk">combined_trim.wav</a> <br>
+        <audio src="assets/moose_trim(10).wav" type="audio/wav" autoplay="true" controls="" preload="auto" autobuffer="" id="noise"></audio> <br><br>
+        <a class="idk">Pretty cool, huh?</a>
+
+        <p>
+            Now let's export the file, you can name this whatever you like.
+        </p>
+        <img src="assets/noise4.png" class="mid"><br><br>
+        <img src="assets/noise5.png" class="small">
+
+        <p>
+            Now that we have our extracted audio with clear morse code, let's find an online audio-morse decoder to help us. <br>
+            For our purposes, let's use <a href="https://morsecode.world/international/decoder/audio-decoder-adaptive.html">this</a>.
+        </p>
+
+        <p>Let's upload our file and hit play. And....</p>
+        <img src="assets/noise7.png" class="mid">
+
+        <p>
+            This doesn't seem right. If the machine detected morse, the bottom-most box in that image should be filled. <br>
+            Seems that our audio file is too soft. Let's inform the program that its minimum threshold should be set lower.
+        </p>
+
+        <img src="assets/noise8.png" class="mid">
+        <p>In our case, let's drop the minimum threshold to -120dB, and let's stop and replay the program.</p>
+        <img src="assets/noise9.png" class="mid">
+        
+        <p>Alright! And here we have our flag!</p>
+        <img src="assets/noise10.png" class="mid">
+
+        <hr>
+        <p>
+            But that program earlier didn't quite work the first time, what would happen if it never worked, like in this case?
+        </p>
+        <img src="assets/noisec.png" class="mid">
+        
+        <p>
+            In cases like these, sometimes it's good to go back to the old ways.
+        </p>
+        
+        <p>
+            If the automatic program doesn't work, open audacity up again, and import the audio file you saved.
+        </p>
+        <img src="assets/noisea.png" class="mid">
+        
+        <p>
+            Navigate though the soundwave using <code>ctrl+scrollwheel</code> to zoom, and <code>shift+scrollwheel</code> to move sideways along the track.
+        </p>
+        <img src="assets/noiseb.png" class="mid">
+        
+        <p>
+            You know the drill, short bars are dots (.) and long bars are dashes (-). With this information, go alone the track and write out the string by hand. <br>
+            You should be left with
+        </p>
+        
+        <div class="coode">
+            <code>
+                .-.. -. -.-. ..--- ----- ..--- ...-- .-. .- -.. .. --- .-- .- ...- . .. -. - . .-. ..-. . .-. . -. -.-. .
+            </code>
+        </div>
+        
+        <p>
+            Now let's look for a TEXT morse code translator to use. For our purposes let's use <a href="https://morsecode.world/international/translator.html">this one</a>.
+        </p>
+        <img src="assets/noised.png" class="mid">
+        
+        <p>
+            And there you have it! The flag obtained in two ways!
+        </p> 
+        <hr>
+        
+        <div class="header">
+            <h1>Reflection</h1>
+        </div>
+        <p>
+            This challenge was pretty cool, it was fun to apply sound engineering concepts in a CTF environment, that was a very new experience for me. <br><br>
+            Creating this writeup however was a challenge, since it's hard to narrate everything you do without it sounding boring lol, especially in a challenge that involves sound, 
+            it's hard to engage the viewers if you only have text and images to express yourself lol <br><br>
+            Other than that, there isn't much left to say. The challenge truly lived up to its difficulty of being easy.
+        </p>
+
+        </div>
+</body>
+</html>
